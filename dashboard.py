@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import plotly.express as px
 from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
@@ -35,7 +36,12 @@ bar_fig = px.bar(
 )
 
 # Aktualisieren der Achsenreihenfolge, um die Sortierung zu reflektieren
-bar_fig.update_layout(xaxis={'categoryorder':'total descending'})
+bar_fig.update_layout(
+    xaxis={'categoryorder':'total descending'},
+    height=300,
+    margin=dict(l=20, r=20, t=40, b=20),
+    font=dict(size=10)
+)
 
 # Streudiagramm: Preis vs. Wohnfläche
 scatter_fig = px.scatter(
@@ -48,10 +54,15 @@ scatter_fig = px.scatter(
     labels={'LivingSpace': 'Wohnfläche (qm)', 'Price': 'Preis (CHF)'}
 )
 
+scatter_fig.update_layout(
+    height=300,
+    margin=dict(l=20, r=20, t=40, b=20),
+    font=dict(size=10)
+)
+
 # Karte: Teuerste Häuser
 most_expensive = data.sort_values(by='Price', ascending=False).head(10)
 
-# Dictionary mit Koordinaten der Ortschaften (wie zuvor definiert)
 locality_coords = {
     'Grimentz': {'Latitude': 46.1806, 'Longitude': 7.5761},
     'Lugano': {'Latitude': 46.0037, 'Longitude': 8.9511},
@@ -66,7 +77,6 @@ locality_coords = {
     # Weitere Ortschaften hinzufügen, falls erforderlich
 }
 
-# Funktion zur Zuordnung der Koordinaten
 def get_coordinates(locality):
     coords = locality_coords.get(locality)
     if coords:
@@ -86,26 +96,28 @@ map_fig = px.scatter_mapbox(
     color='Price',
     size='Price',
     zoom=7,
-    height=600,
+    height=400,
     title='Teuerste Häuser in der Schweiz'
 )
 
-map_fig.update_layout(mapbox_style="open-street-map")
-map_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+map_fig.update_layout(
+    mapbox_style="open-street-map",
+    margin={"r":0,"t":40,"l":40,"b":0},
+    font=dict(size=10)
+)
 
-# App Layout
 app.layout = dbc.Container([
     dbc.Row([
-        dbc.Col(html.H1("Hauspreise in der Schweiz"), width=15)
-    ], style={'textAlign': 'center', 'marginTop': 20, 'marginBottom': 20}),
+        dbc.Col(html.H1("Hauspreise in der Schweiz", style={'fontSize': '20px'}), width=12)
+    ], style={'textAlign': 'center', 'marginTop': 10, 'marginBottom': 10}),
     dbc.Row([
         dbc.Col(dcc.Graph(figure=bar_fig), width=6),
         dbc.Col(dcc.Graph(figure=scatter_fig), width=6),
-    ]),
+    ], style={'marginBottom': 10}),
     dbc.Row([
         dbc.Col(dcc.Graph(figure=map_fig), width=12)
-    ])
-], fluid=True)
+    ], style={'marginBottom': 10})
+], fluid=True, style={'padding': '0px'})
 
 if __name__ == '__main__':
     app.run_server(debug=True)
